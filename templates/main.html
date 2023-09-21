@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Билеты на Маяк</title>
+  <link rel="icon" href="favicon.png" type="image/x-icon">
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+    crossorigin="anonymous"
+  />
+  <style>
+    body {
+      height: 100%;
+    }
+    .container {
+      height: 100%;
+    }
+    .row-divider {
+      position: relative;
+      margin-bottom: 20px; /* Добавляем отступ между рядами */
+    }
+    .row-divider::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      border-top: 0px solid #000; /* Устанавливаем цвет границы */
+      transform: translateY(-50%);
+    }
+    .logo-img {
+      height: 36px;
+      margin-right: 12px;
+    }
+    .text-left {
+      width: 70%;
+      margin-left: 0;
+      margin-right: 0;
+      text-align: left;
+    }
+    .img-fluid {
+      width: 700px;
+      height: 400px;
+    }
+    .btn-primary {
+      font-size: 24px;
+      padding: 16px 32px;
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translate(0, -50%);
+    }
+    .btn-secondary {
+      color: #fff;
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+        <img src="favicon.png" alt="Logo" class="logo-img">
+        <span class="fs-4">Билеты на Маяк</span>
+      </a>
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a href="main" class="nav-link active" aria-current="page">Главная</a>
+        </li>
+        <li class="nav-item">
+          <a href="support" class="nav-link">Поддержка</a>
+        </li>
+        <li class="nav-item">
+          <a href="main" class="nav-link">Баланс 10 RUB</a>
+        </li>
+      </ul>
+    </header>
+    <div class="text-center">
+      <div class="row row-divider">
+        <div class="col">
+          <img src="1.jpg" alt="Image 1" class="img-fluid">
+        </div>
+        <div class="col">
+          <img src="2.jpg" alt="Image 2" class="img-fluid">
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between position-relative">
+      <div class="text text-left">
+        <h1>Толбухин маяк</h1>
+        <p>
+          Толбухинский маяк всегда оставался непреходящим символом могущества и загадочности. Возвышаясь на высоком утесе у побережья, он привлекал взгляды мореплавателей и путешественников со всех уголков мира. Этот каменный страж ночей исторических морей был свидетелем множества морских приключений и судьбоносных решений.<br><br> Хотите испытать этот волшебный момент собственными глазами? Приглашаем вас приобрести билеты на Толбухинский маяк и отправиться в незабываемое путешествие. Прочувствуйте силу природы и насладитесь великолепием маяка, который стоит на страже морских тайн и подарит вам впечатления на всю жизнь.
+        </p>
+      </div>
+      <button id="buyButton" class="btn btn-primary">Купить билет</br>100 RUB</button>
+    </div>
+    <div id="serverResponseModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <p id="serverResponseText"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="closeModalButton" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="promoCodeModal" class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <input type="text" id="promoCodeInput" class="form-control" placeholder="Введите промокод">
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="cancelPromoCodeButton" class="btn btn-secondary">Отмена</button>
+            <button type="button" id="submitPromoCodeButton" class="btn btn-secondary">Отправить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $("#buyButton").click(function() {
+          $("#promoCodeModal").modal("show"); // Открыть модальное окно для ввода промокода
+        });
+    
+        $("#submitPromoCodeButton").click(function() {
+          var promoCode = $("#promoCodeInput").val(); // Получить значение промокода из поля ввода
+          var requestData = {price: 100, promoCode: promoCode};
+          $.ajax({
+            url: "/buy-ticket",
+            type: "POST",
+            data: JSON.stringify(requestData),
+            contentType: "application/json",
+            success: function(response) {
+              console.log(response);
+              $("#serverResponseText").text(response);
+              $("#serverResponseModal").modal("show"); // Открыть модальное окно с ответом сервера
+            },
+            error: function(error) {
+              console.error(error);
+            }
+          });
+    
+          $("#promoCodeModal").modal("hide"); // Закрыть модальное окно для ввода промокода
+        });
+    
+        $("#cancelPromoCodeButton").click(function() {
+          $("#promoCodeModal").modal("hide"); // Закрыть модальное окно для ввода промокода
+        });
+    
+        $("#closeModalButton").click(function() {
+          $("#serverResponseModal").modal("hide");
+        });
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+  </body>
+</html>
